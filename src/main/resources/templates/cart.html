@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Cart')}"></head>
+<body>
+<th:block th:replace="~{fragments :: header}"></th:block>
+
+<main class="container page">
+  <h1 class="page-title">Shopping Cart</h1>
+
+  <div class="empty-state" th:if="${#lists.isEmpty(items)}">
+    <div class="empty-icon">🛒</div>
+    <h3>Your cart is empty</h3>
+    <p>Looks like you haven't added anything yet.</p>
+    <a class="btn btn-primary" th:href="@{/products}">Start shopping</a>
+  </div>
+
+  <div class="cart-layout" th:if="${!#lists.isEmpty(items)}">
+    <div class="cart-list">
+      <div class="cart-row" th:each="item : ${items}">
+        <a class="cart-thumb" th:href="@{/product/{id}(id=${item.product.id})}">
+          <th:block th:replace="~{fragments :: media(${item.product})}"></th:block>
+        </a>
+        <div class="cart-info">
+          <span class="brand-name" th:if="${!#strings.isEmpty(item.product.brand)}" th:text="${item.product.brand}">Brand</span>
+          <a th:href="@{/product/{id}(id=${item.product.id})}" th:text="${item.product.name}">Product</a>
+          <span class="muted">
+            <span th:if="${item.size != null}" th:text="|Size: ${item.size}|">Size</span>
+            <span th:if="${item.size != null and !#strings.isEmpty(item.product.color)}"> · </span>
+            <span th:if="${!#strings.isEmpty(item.product.color)}" th:text="|Color: ${item.product.color}|">Color</span>
+          </span>
+          <span class="price-line">
+            <span class="price-sm" th:text="|₹${#numbers.formatDecimal(item.product.price,1,'COMMA',0,'POINT')}|">₹0</span>
+            <span class="mrp" th:if="${item.product.discountPercent > 0}" th:text="|₹${#numbers.formatDecimal(item.product.mrp,1,'COMMA',0,'POINT')}|">₹0</span>
+            <span class="off" th:if="${item.product.discountPercent > 0}" th:text="|${item.product.discountPercent}% off|">0% off</span>
+          </span>
+        </div>
+        <form class="qty-form" th:action="@{/cart/update/{id}(id=${item.id})}" method="post">
+          <input type="number" name="quantity" min="1" th:max="${item.product.stock}" th:value="${item.quantity}">
+          <button class="btn btn-outline btn-sm" type="submit">Update</button>
+        </form>
+        <div class="line-total" th:text="|₹${#numbers.formatDecimal(item.subtotal,1,'COMMA',0,'POINT')}|">₹0</div>
+        <form th:action="@{/cart/remove/{id}(id=${item.id})}" method="post">
+          <button class="icon-btn" type="submit" title="Remove item">✕</button>
+        </form>
+      </div>
+    </div>
+
+    <aside class="summary">
+      <h3>Price Details</h3>
+      <div class="sum-row"><span th:text="|Price (${itemCount} item(s))|">Price</span><span th:text="|₹${#numbers.formatDecimal(mrpTotal,1,'COMMA',0,'POINT')}|">₹0</span></div>
+      <div class="sum-row" th:if="${savings.signum() > 0}"><span>Discount</span><span class="free" th:text="|− ₹${#numbers.formatDecimal(savings,1,'COMMA',0,'POINT')}|">₹0</span></div>
+      <div class="sum-row"><span>Delivery</span><span class="free">FREE</span></div>
+      <div class="sum-row sum-total"><span>Total</span><span th:text="|₹${#numbers.formatDecimal(total,1,'COMMA',0,'POINT')}|">₹0</span></div>
+      <p class="save-note" th:if="${savings.signum() > 0}" th:text="|You will save ₹${#numbers.formatDecimal(savings,1,'COMMA',0,'POINT')} on this order|">You will save</p>
+      <a class="btn btn-primary btn-block btn-lg" th:href="@{/checkout}">Place Order</a>
+      <p class="muted center" style="margin:0;font-size:.85rem">💵 Pay with Cash on Delivery</p>
+      <a class="btn btn-outline btn-block" th:href="@{/products}">Continue Shopping</a>
+      <form th:action="@{/cart/clear}" method="post">
+        <button class="btn btn-ghost btn-block" type="submit" onclick="return confirm('Remove all items from your cart?');">Clear Cart</button>
+      </form>
+    </aside>
+  </div>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

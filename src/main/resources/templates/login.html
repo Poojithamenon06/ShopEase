@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Sign In')}"></head>
+<body>
+<th:block th:replace="~{fragments :: header}"></th:block>
+
+<main class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-side">
+      <h2>Welcome back 👋</h2>
+      <p>Sign in to save items to your cart and shop faster.</p>
+      <ul>
+        <li>✔ Secure account</li>
+        <li>✔ Filter by size, color &amp; fabric</li>
+        <li>✔ Save your cart</li>
+      </ul>
+    </div>
+    <form class="auth-form" th:action="@{/login}" method="post">
+      <h1>Sign In</h1>
+      <p class="muted">Enter your credentials to continue.</p>
+      <div class="alert alert-error" th:if="${param.error}">Invalid email or password.</div>
+      <div class="alert alert-success" th:if="${param.logout}">You have been logged out.</div>
+
+      <label for="username">Email</label>
+      <input id="username" type="email" name="username" placeholder="you@example.com" required autofocus>
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" placeholder="Your password" required>
+      <button class="btn btn-primary btn-lg btn-block" type="submit">Sign In</button>
+      <p class="auth-alt">New to ShopEase? <a th:href="@{/register}">Create an account</a></p>
+    </form>
+  </div>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

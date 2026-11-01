@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${title} + ' | ShopEase'">ShopEase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <script th:src="@{/js/app.js}" defer></script>
+</head>
+<body>
+
+<!-- ===== NAVBAR + CATEGORY STRIP + FLASH MESSAGES ===== -->
+<th:block th:fragment="header">
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a th:href="@{/}" class="brand"><span class="brand-mark">S</span>ShopEase</a>
+      <button class="nav-toggle" type="button" id="navToggle" aria-label="Toggle menu">☰</button>
+      <nav class="nav-links" id="navLinks">
+        <a th:href="@{/}">Home</a>
+        <a th:href="@{/products}">All Products</a>
+        <a sec:authorize="isAuthenticated()" th:href="@{/orders}">My Orders</a>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin}">Admin</a>
+      </nav>
+      <form class="nav-search" th:action="@{/products}" method="get">
+        <select name="category" aria-label="Category">
+          <option value="">All</option>
+          <option th:each="c : ${navCategories}" th:value="${c}" th:text="${c}">Category</option>
+        </select>
+        <input type="text" name="q" placeholder="Search for products, brands and more" aria-label="Search products">
+        <button type="submit" aria-label="Search">🔍</button>
+      </form>
+      <div class="nav-actions">
+        <th:block sec:authorize="isAnonymous()">
+          <a th:href="@{/login}" class="btn btn-ghost btn-sm">Sign In</a>
+          <a th:href="@{/register}" class="btn btn-primary btn-sm">Sign Up</a>
+        </th:block>
+        <th:block sec:authorize="isAuthenticated()">
+          <a th:href="@{/cart}" class="cart-link">🛒 Cart
+            <span class="cart-badge" th:if="${cartCount != null and cartCount > 0}" th:text="${cartCount}">0</span>
+          </a>
+          <span class="user-chip" th:text="${displayName}">User</span>
+          <form th:action="@{/logout}" method="post">
+            <button class="btn btn-outline btn-sm" type="submit">Logout</button>
+          </form>
+        </th:block>
+      </div>
+    </div>
+    <nav class="cat-strip" th:if="${!#lists.isEmpty(navCategories)}">
+      <div class="container cat-strip-inner">
+        <a th:each="c : ${navCategories}" th:href="@{/products(category=${c})}" th:text="${c}">Category</a>
+      </div>
+    </nav>
+  </header>
+  <div class="container flash-wrap" th:if="${success != null or error != null}">
+    <div class="alert alert-success" th:if="${success != null}" th:text="${success}"></div>
+    <div class="alert alert-error" th:if="${error != null}" th:text="${error}"></div>
+  </div>
+</th:block>
+
+<!-- ===== PRODUCT IMAGE (with emoji fallback) ===== -->
+<th:block th:fragment="media(p)">
+  <img th:if="${!#strings.isEmpty(p.imageUrl)}" th:src="${p.imageUrl}" th:alt="${p.name}" loading="lazy"
+       onerror="this.style.display='none';this.nextElementSibling.classList.add('show')">
+  <div class="img-fallback" th:classappend="${#strings.isEmpty(p.imageUrl)} ? 'show'" th:text="${p.emoji}">🛍️</div>
+</th:block>
+
+<!-- ===== PRODUCT CARD ===== -->
+<article class="product-card" th:fragment="productCard(p)">
+  <a th:href="@{/product/{id}(id=${p.id})}" class="product-media">
+    <th:block th:replace="~{fragments :: media(${p})}"></th:block>
+    <span class="badge badge-low" th:if="${p.stock > 0 and p.stock <= 5}">Only few left</span>
+    <span class="badge badge-out" th:if="${p.stock <= 0}">Sold out</span>
+  </a>
+  <div class="product-body">
+    <span class="brand-name" th:if="${!#strings.isEmpty(p.brand)}" th:text="${p.brand}">Brand</span>
+    <h3 class="product-title"><a th:href="@{/product/{id}(id=${p.id})}" th:text="${p.name}">Product</a></h3>
+    <div class="meta-line">
+      <span class="rating" th:if="${p.rating != null}" th:text="${#numbers.formatDecimal(p.rating,1,1)} + ' ★'">4.3 ★</span>
+      <span class="muted" th:text="${p.category}">Category</span>
+    </div>
+    <div class="price-line">
+      <span class="price" th:text="|₹${#numbers.formatDecimal(p.price,1,'COMMA',0,'POINT')}|">₹0</span>
+      <span class="mrp" th:if="${p.discountPercent > 0}" th:text="|₹${#numbers.formatDecimal(p.mrp,1,'COMMA',0,'POINT')}|">₹0</span>
+      <span class="off" th:if="${p.discountPercent > 0}" th:text="|${p.discountPercent}% off|">0% off</span>
+    </div>
+    <div class="card-action">
+      <th:block th:if="${p.stock > 0}">
+        <a th:if="${!#lists.isEmpty(p.sizeList)}" th:href="@{/product/{id}(id=${p.id})}" class="btn btn-outline btn-block btn-sm">Select Size</a>
+        <th:block th:if="${#lists.isEmpty(p.sizeList)}">
+          <form sec:authorize="isAuthenticated()" th:action="@{/cart/add/{id}(id=${p.id})}" method="post">
+            <button class="btn btn-primary btn-block btn-sm" type="submit">Add to Cart</button>
+          </form>
+          <a sec:authorize="isAnonymous()" th:href="@{/login}" class="btn btn-primary btn-block btn-sm">Add to Cart</a>
+        </th:block>
+      </th:block>
+      <span class="out-text" th:unless="${p.stock > 0}">Out of stock</span>
+    </div>
+  </div>
+</article>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer" th:fragment="footer">
+  <div class="container footer-inner">
+    <div>
+      <a th:href="@{/}" class="brand brand-light"><span class="brand-mark">S</span>ShopEase</a>
+      <p class="footer-text">Quality products, honest prices and a wide range to choose from. Your one-stop online store.</p>
+    </div>
+    <div>
+      <h4>Shop</h4>
+      <a th:href="@{/products}">All Products</a>
+      <a th:each="c : ${navCategories}" th:href="@{/products(category=${c})}" th:text="${c}">Category</a>
+    </div>
+    <div>
+      <h4>Account</h4>
+      <a th:href="@{/login}">Sign In</a>
+      <a th:href="@{/register}">Create Account</a>
+      <a th:href="@{/cart}">My Cart</a>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 ShopEase. Built with Spring Boot &amp; MySQL.</div>
+</footer>
+
+</body>
+</html>

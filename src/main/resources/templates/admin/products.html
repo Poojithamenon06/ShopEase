@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Manage Products')}"></head>
+<body>
+<th:block th:replace="~{fragments :: header}"></th:block>
+
+<main class="container page">
+  <div class="page-head row-between">
+    <h1 class="page-title">Manage Products</h1>
+    <div class="btn-row">
+      <a class="btn btn-outline" th:href="@{/admin}">← Dashboard</a>
+      <a class="btn btn-primary" th:href="@{/admin/products/new}">+ Add Product</a>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>ID</th><th>Product</th><th>Category</th><th>Brand</th><th>Price</th><th>Stock</th><th class="right">Actions</th></tr></thead>
+      <tbody>
+        <tr th:each="p : ${products}">
+          <td th:text="${p.id}">1</td>
+          <td><div class="cell-product"><span class="mini-thumb" th:text="${p.emoji}">🛍️</span><strong th:text="${p.name}">Name</strong></div></td>
+          <td th:text="${p.category}">Category</td>
+          <td th:text="${p.brand}">Brand</td>
+          <td th:text="|₹${#numbers.formatDecimal(p.price,1,'COMMA',0,'POINT')}|">₹0</td>
+          <td><span class="pill" th:classappend="${p.stock <= 5} ? 'pill-warn' : 'pill-ok'" th:text="${p.stock}">0</span></td>
+          <td class="right">
+            <div class="btn-row end">
+              <a class="btn btn-outline btn-sm" th:href="@{/admin/products/edit/{id}(id=${p.id})}">Edit</a>
+              <form th:action="@{/admin/products/delete/{id}(id=${p.id})}" method="post" onsubmit="return confirm('Delete this product?');">
+                <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(products)}"><td colspan="7" class="center muted">No products yet</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

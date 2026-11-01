@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Sign Up')}"></head>
+<body>
+<th:block th:replace="~{fragments :: header}"></th:block>
+
+<main class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-side">
+      <h2>Join ShopEase 🎉</h2>
+      <p>Create a free account and start shopping in less than a minute.</p>
+      <ul>
+        <li>✔ Free account</li>
+        <li>✔ Passwords stored securely (BCrypt)</li>
+        <li>✔ Order history in one place</li>
+      </ul>
+    </div>
+    <form class="auth-form" th:action="@{/register}" th:object="${registerForm}" method="post" novalidate>
+      <h1>Create Account</h1>
+      <p class="muted">Fill in your details below.</p>
+
+      <label for="name">Full name</label>
+      <input id="name" type="text" th:field="*{name}" placeholder="Your name" th:errorclass="invalid">
+      <small class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">error</small>
+
+      <label for="email">Email</label>
+      <input id="email" type="email" th:field="*{email}" placeholder="you@example.com" th:errorclass="invalid">
+      <small class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">error</small>
+
+      <label for="password">Password</label>
+      <input id="password" type="password" th:field="*{password}" placeholder="At least 6 characters" th:errorclass="invalid">
+      <small class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">error</small>
+
+      <label for="confirmPassword">Confirm password</label>
+      <input id="confirmPassword" type="password" th:field="*{confirmPassword}" placeholder="Re-enter password" th:errorclass="invalid">
+      <small class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">error</small>
+
+      <button class="btn btn-primary btn-lg btn-block" type="submit">Sign Up</button>
+      <p class="auth-alt">Already have an account? <a th:href="@{/login}">Sign in</a></p>
+    </form>
+  </div>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

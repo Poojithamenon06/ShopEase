@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Order Details')}"></head>
+<body>
+<th:block th:replace="~{fragments :: header}"></th:block>
+
+<main class="container page narrow">
+
+  <div class="card form-card" th:if="${justPlaced != null}" style="text-align:center;margin-bottom:22px">
+    <div style="font-size:3rem">🎉</div>
+    <h1 class="page-title" style="margin:6px 0">Order placed successfully!</h1>
+    <p class="muted" style="margin:0">Thank you for shopping with ShopEase. Please keep
+      <strong th:text="|₹${#numbers.formatDecimal(order.total,1,'COMMA',0,'POINT')}|">₹0</strong> ready to pay in cash on delivery.</p>
+  </div>
+
+  <div class="order-card">
+    <div class="order-head">
+      <div>
+        <strong th:text="|Order #${order.orderNumber}|">Order #SE100001</strong>
+        <span class="muted" th:text="|Placed on ${order.placedOnText}|">Placed on</span>
+      </div>
+      <span class="status" th:classappend="|status-${#strings.toLowerCase(order.status)}|" th:text="${order.statusLabel}">Order placed</span>
+    </div>
+
+    <ul class="order-items">
+      <li th:each="it : ${order.items}">
+        <span th:text="|${it.productName}${it.size != null ? ' (' + it.size + ')' : ''} × ${it.quantity}|">Product × 1</span>
+        <span th:text="|₹${#numbers.formatDecimal(it.subtotal,1,'COMMA',0,'POINT')}|">₹0</span>
+      </li>
+    </ul>
+
+    <div class="order-foot" style="flex-direction:column;gap:8px">
+      <div class="sum-row"><span th:text="|Price (${order.itemCount} item(s))|">Price</span><span th:text="|₹${#numbers.formatDecimal(order.mrpTotal,1,'COMMA',0,'POINT')}|">₹0</span></div>
+      <div class="sum-row" th:if="${order.savings.signum() > 0}"><span>Discount</span><span class="free" th:text="|− ₹${#numbers.formatDecimal(order.savings,1,'COMMA',0,'POINT')}|">₹0</span></div>
+      <div class="sum-row"><span>Delivery</span><span class="free">FREE</span></div>
+      <div class="sum-row sum-total"><span>Total (pay on delivery)</span><span th:text="|₹${#numbers.formatDecimal(order.total,1,'COMMA',0,'POINT')}|">₹0</span></div>
+    </div>
+  </div>
+
+  <div class="order-card">
+    <h3 style="margin-top:0">Delivery address</h3>
+    <p style="margin:0;line-height:1.6">
+      <strong th:text="${order.fullName}">Name</strong><br>
+      <span th:text="${order.address}">Address</span><br>
+      <span th:text="|${order.city}, ${order.state} - ${order.pincode}|">City, State - 000000</span><br>
+      <span th:text="|Mobile: ${order.phone}|">Mobile</span>
+    </p>
+    <p class="muted" style="margin:14px 0 0" th:unless="${order.status == 'CANCELLED'}"
+       th:text="|Payment: ${order.paymentLabel} · Expected delivery by ${order.expectedDeliveryText}|">Payment</p>
+  </div>
+
+  <div class="btn-row">
+    <a class="btn btn-primary" th:href="@{/products}">Continue Shopping</a>
+    <a class="btn btn-outline" th:href="@{/orders}">All Orders</a>
+    <form th:if="${order.cancellable}" th:action="@{/orders/{id}/cancel(id=${order.id})}" method="post" style="margin:0"
+          onsubmit="return confirm('Cancel this order?')">
+      <button class="btn btn-danger" type="submit">Cancel Order</button>
+    </form>
+  </div>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

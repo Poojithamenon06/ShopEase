@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Shop')}"></head>
+<body>
+<th:block th:replace="~{fragments :: header}"></th:block>
+
+<main class="container page">
+  <div class="shop-layout">
+
+    <!-- ============ FILTER SIDEBAR ============ -->
+    <aside class="filters" id="filters">
+      <form id="filterForm" th:action="@{/products}" method="get">
+        <input type="hidden" name="q" th:value="${q}">
+
+        <div class="filter-head">
+          <h3>Filters</h3>
+          <a th:href="@{/products(q=${q})}">Clear all</a>
+        </div>
+
+        <div class="filter-group">
+          <h4>Category</h4>
+          <label class="check">
+            <input type="radio" name="category" value="" th:checked="${#strings.isEmpty(selectedCategory)}">
+            <span>All categories</span>
+          </label>
+          <label class="check" th:each="c : ${categories}">
+            <input type="radio" name="category" th:value="${c}" th:checked="${#strings.equalsIgnoreCase(c, selectedCategory)}">
+            <span th:text="${c}">Category</span>
+          </label>
+        </div>
+
+        <div class="filter-group">
+          <h4>Price (₹)</h4>
+          <div class="price-inputs">
+            <input type="number" name="minPrice" min="0" placeholder="Min" th:value="${minPrice}">
+            <span>to</span>
+            <input type="number" name="maxPrice" min="0" placeholder="Max" th:value="${maxPrice}">
+          </div>
+        </div>
+
+        <div class="filter-group" th:if="${!#lists.isEmpty(facets.sizes)}">
+          <h4>Size</h4>
+          <div class="size-grid">
+            <label class="size-chip" th:each="s : ${facets.sizes}">
+              <input type="checkbox" name="size" th:value="${s}" th:checked="${selectedSizes.contains(s)}">
+              <span th:text="${s}">M</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="filter-group" th:if="${!#lists.isEmpty(facets.colors)}">
+          <h4>Color</h4>
+          <label class="check" th:each="c : ${facets.colors}">
+            <input type="checkbox" name="color" th:value="${c}" th:checked="${selectedColors.contains(c)}">
+            <span class="swatch" th:style="|background:${facets.hexOf(c)}|"></span>
+            <span th:text="${c}">Color</span>
+          </label>
+        </div>
+
+        <div class="filter-group scroll-y" th:if="${!#lists.isEmpty(facets.fabrics)}">
+          <h4>Fabric / Material</h4>
+          <label class="check" th:each="f : ${facets.fabrics}">
+            <input type="checkbox" name="fabric" th:value="${f}" th:checked="${selectedFabrics.contains(f)}">
+            <span th:text="${f}">Cotton</span>
+          </label>
+        </div>
+
+        <div class="filter-group scroll-y" th:if="${!#lists.isEmpty(facets.brands)}">
+          <h4>Brand</h4>
+          <label class="check" th:each="b : ${facets.brands}">
+            <input type="checkbox" name="brand" th:value="${b}" th:checked="${selectedBrands.contains(b)}">
+            <span th:text="${b}">Brand</span>
+          </label>
+        </div>
+
+        <div class="filter-group">
+          <h4>Availability</h4>
+          <label class="check">
+            <input type="checkbox" name="inStock" value="true" th:checked="${inStock}">
+            <span>Exclude out of stock</span>
+          </label>
+        </div>
+
+        <button class="btn btn-primary btn-block" type="submit">Apply Filters</button>
+      </form>
+    </aside>
+
+    <!-- ============ RESULTS ============ -->
+    <section class="results">
+      <div class="results-head">
+        <div>
+          <h1 class="page-title" th:text="${!#strings.isEmpty(selectedCategory) ? selectedCategory : (!#strings.isEmpty(q) ? 'Results for “' + q + '”' : 'All Products')}">All Products</h1>
+          <p class="muted" th:text="${#lists.size(products)} + ' item(s) found'">0 items</p>
+        </div>
+        <div class="results-tools">
+          <button type="button" class="btn btn-outline btn-sm filter-toggle" id="filterToggle">☰ Filters</button>
+          <label class="sort-box">Sort by
+            <select name="sort" form="filterForm">
+              <option value="newest" th:selected="${sort == 'newest'}">Newest first</option>
+              <option value="rating" th:selected="${sort == 'rating'}">Top rated</option>
+              <option value="priceAsc" th:selected="${sort == 'priceAsc'}">Price: Low to High</option>
+              <option value="priceDesc" th:selected="${sort == 'priceDesc'}">Price: High to Low</option>
+              <option value="nameAsc" th:selected="${sort == 'nameAsc'}">Name: A to Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="grid grid-shop" th:if="${!#lists.isEmpty(products)}">
+        <th:block th:each="p : ${products}">
+          <th:block th:replace="~{fragments :: productCard(${p})}"></th:block>
+        </th:block>
+      </div>
+
+      <div class="empty-state" th:if="${#lists.isEmpty(products)}">
+        <div class="empty-icon">🔍</div>
+        <h3>No products match your filters</h3>
+        <p>Try removing some filters or searching for something else.</p>
+        <a class="btn btn-primary" th:href="@{/products}">Clear all filters</a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('My Orders')}"></head>
+<body>
+<th:block th:replace="~{fragments :: header}"></th:block>
+
+<main class="container page narrow">
+  <h1 class="page-title">My Orders</h1>
+
+  <div class="empty-state" th:if="${#lists.isEmpty(orders)}">
+    <div class="empty-icon">📦</div>
+    <h3>You have not placed any orders yet</h3>
+    <p>When you place an order it will show up here.</p>
+    <a class="btn btn-primary" th:href="@{/products}">Start shopping</a>
+  </div>
+
+  <div class="order-card" th:each="o : ${orders}">
+    <div class="order-head">
+      <div>
+        <strong th:text="|Order #${o.orderNumber}|">Order #SE100001</strong>
+        <span class="muted" th:text="|Placed on ${o.placedOnText}|">Placed on</span>
+      </div>
+      <span class="status" th:classappend="|status-${#strings.toLowerCase(o.status)}|" th:text="${o.statusLabel}">Order placed</span>
+    </div>
+    <ul class="order-items">
+      <li th:each="it : ${o.items}">
+        <span th:text="|${it.productName}${it.size != null ? ' (' + it.size + ')' : ''} × ${it.quantity}|">Product × 1</span>
+        <span th:text="|₹${#numbers.formatDecimal(it.subtotal,1,'COMMA',0,'POINT')}|">₹0</span>
+      </li>
+    </ul>
+    <div class="order-foot">
+      <span><strong th:text="|Total ₹${#numbers.formatDecimal(o.total,1,'COMMA',0,'POINT')}|">Total</strong> · <span class="muted">Cash on Delivery</span></span>
+      <a class="btn btn-outline btn-sm" th:href="@{/orders/{id}(id=${o.id})}">View details</a>
+    </div>
+  </div>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Checkout')}"></head>
+<body>
+<th:block th:replace="~{fragments :: header}"></th:block>
+
+<main class="container page">
+  <h1 class="page-title">Checkout</h1>
+
+  <div class="cart-layout">
+    <!-- ======== Address + payment ======== -->
+    <form id="checkoutForm" class="card form-card" th:action="@{/checkout}" th:object="${form}" method="post">
+      <h3>Delivery address</h3>
+
+      <div class="two-col">
+        <div>
+          <label for="fullName">Full name</label>
+          <input id="fullName" type="text" th:field="*{fullName}" th:errorclass="invalid" autocomplete="name">
+          <small class="field-error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}">error</small>
+        </div>
+        <div>
+          <label for="phone">Mobile number</label>
+          <input id="phone" type="text" th:field="*{phone}" th:errorclass="invalid" maxlength="10" inputmode="numeric" placeholder="10-digit number" autocomplete="tel">
+          <small class="field-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">error</small>
+        </div>
+      </div>
+
+      <label for="address">Address (house no, street, area)</label>
+      <textarea id="address" rows="3" th:field="*{address}" th:errorclass="invalid" autocomplete="street-address"></textarea>
+      <small class="field-error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}">error</small>
+
+      <div class="two-col">
+        <div>
+          <label for="city">City</label>
+          <input id="city" type="text" th:field="*{city}" th:errorclass="invalid">
+          <small class="field-error" th:if="${#fields.hasErrors('city')}" th:errors="*{city}">error</small>
+        </div>
+        <div>
+          <label for="state">State</label>
+          <input id="state" type="text" th:field="*{state}" th:errorclass="invalid">
+          <small class="field-error" th:if="${#fields.hasErrors('state')}" th:errors="*{state}">error</small>
+        </div>
+      </div>
+
+      <label for="pincode">Pincode</label>
+      <input id="pincode" type="text" th:field="*{pincode}" th:errorclass="invalid" maxlength="6" inputmode="numeric" placeholder="6-digit pincode" autocomplete="postal-code">
+      <small class="field-error" th:if="${#fields.hasErrors('pincode')}" th:errors="*{pincode}">error</small>
+
+      <h3 style="margin-top:28px">Payment method</h3>
+      <label class="radio-card">
+        <input type="radio" name="paymentMethod" value="COD" checked>
+        <span>
+          <strong>Cash on Delivery</strong>
+          <small>Pay in cash when your order arrives at your doorstep.</small>
+        </span>
+      </label>
+    </form>
+
+    <!-- ======== Order summary ======== -->
+    <aside class="summary">
+      <h3>Order Summary</h3>
+      <div class="mini-item" th:each="item : ${items}">
+        <span th:text="|${item.product.name}${item.size != null ? ' (' + item.size + ')' : ''} × ${item.quantity}|">Product × 1</span>
+        <span th:text="|₹${#numbers.formatDecimal(item.subtotal,1,'COMMA',0,'POINT')}|">₹0</span>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--line);width:100%;margin:4px 0">
+      <div class="sum-row"><span th:text="|Price (${itemCount} item(s))|">Price</span><span th:text="|₹${#numbers.formatDecimal(mrpTotal,1,'COMMA',0,'POINT')}|">₹0</span></div>
+      <div class="sum-row" th:if="${savings.signum() > 0}"><span>Discount</span><span class="free" th:text="|− ₹${#numbers.formatDecimal(savings,1,'COMMA',0,'POINT')}|">₹0</span></div>
+      <div class="sum-row"><span>Delivery</span><span class="free">FREE</span></div>
+      <div class="sum-row sum-total"><span>Amount to pay on delivery</span><span th:text="|₹${#numbers.formatDecimal(total,1,'COMMA',0,'POINT')}|">₹0</span></div>
+      <p class="save-note" th:if="${savings.signum() > 0}" th:text="|You will save ₹${#numbers.formatDecimal(savings,1,'COMMA',0,'POINT')} on this order|">You will save</p>
+      <button class="btn btn-primary btn-block btn-lg" type="submit" form="checkoutForm">Place Order</button>
+      <a class="btn btn-ghost btn-block" th:href="@{/cart}">← Back to cart</a>
+    </aside>
+  </div>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

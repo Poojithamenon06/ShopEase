@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Oops')}"></head>
+<body>
+<th:block th:replace="~{fragments :: header}"></th:block>
+<main class="container page">
+  <div class="empty-state">
+    <div class="empty-icon">😕</div>
+    <h3 th:text="${status != null} ? ('Error ' + ${status}) : 'Something went wrong'">Something went wrong</h3>
+    <p>The page you are looking for doesn't exist or you don't have access to it.</p>
+    <a class="btn btn-primary" th:href="@{/}">Back to home</a>
+  </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

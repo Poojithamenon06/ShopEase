@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Admin Dashboard')}"></head>
+<body>
+<th:block th:replace="~{fragments :: header}"></th:block>
+
+<main class="container page">
+  <div class="page-head row-between">
+    <h1 class="page-title">Admin Dashboard</h1>
+    <div class="btn-row">
+      <a class="btn btn-primary" th:href="@{/admin/products/new}">+ Add Product</a>
+      <a class="btn btn-outline" th:href="@{/admin/products}">Manage Products</a>
+      <form th:action="@{/admin/import}" method="post" style="display:inline"
+            onsubmit="return confirm('Download / refresh all products from DummyJSON?')">
+        <button class="btn btn-outline" type="submit">⟳ Import from DummyJSON</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span>📦</span><div><small>Products</small><strong th:text="${productCount}">0</strong></div></div>
+    <div class="stat"><span>🗂️</span><div><small>Categories</small><strong th:text="${categoryCount}">0</strong></div></div>
+    <div class="stat"><span>👥</span><div><small>Users</small><strong th:text="${userCount}">0</strong></div></div>
+    <div class="stat"><span>⚠️</span><div><small>Low stock</small><strong th:text="${lowStockCount}">0</strong></div></div>
+  </div>
+
+  <h2 class="mt">Low Stock Products</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Product</th><th>Category</th><th>Stock</th><th class="right">Action</th></tr></thead>
+      <tbody>
+        <tr th:each="p : ${lowStock}">
+          <td><strong th:text="${p.name}">Name</strong></td>
+          <td th:text="${p.category}">Category</td>
+          <td><span class="pill pill-warn" th:text="${p.stock}">0</span></td>
+          <td class="right"><a class="btn btn-outline btn-sm" th:href="@{/admin/products/edit/{id}(id=${p.id})}">Update stock</a></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(lowStock)}"><td colspan="4" class="center muted">All products are well stocked 🎉</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head(${product.name})}"></head>
+<body>
+<th:block th:replace="~{fragments :: header}"></th:block>
+
+<main class="container page">
+  <nav class="breadcrumb">
+    <a th:href="@{/}">Home</a> / <a th:href="@{/products}">Shop</a> /
+    <a th:href="@{/products(category=${product.category})}" th:text="${product.category}">Category</a>
+  </nav>
+
+  <div class="detail">
+    <div class="detail-media">
+      <th:block th:replace="~{fragments :: media(${product})}"></th:block>
+    </div>
+
+    <div class="detail-info">
+      <span class="brand-name" th:if="${!#strings.isEmpty(product.brand)}" th:text="${product.brand}">Brand</span>
+      <h1 th:text="${product.name}">Product name</h1>
+
+      <div class="meta-line">
+        <span class="rating" th:if="${product.rating != null}" th:text="${#numbers.formatDecimal(product.rating,1,1)} + ' ★'">4.3 ★</span>
+        <span class="tag" th:text="${product.category}">Category</span>
+      </div>
+
+      <div class="detail-price-line">
+        <span class="detail-price" th:text="|₹${#numbers.formatDecimal(product.price,1,'COMMA',0,'POINT')}|">₹0</span>
+        <span class="mrp" th:if="${product.discountPercent > 0}" th:text="|₹${#numbers.formatDecimal(product.mrp,1,'COMMA',0,'POINT')}|">₹0</span>
+        <span class="off" th:if="${product.discountPercent > 0}" th:text="|${product.discountPercent}% off|">0% off</span>
+      </div>
+      <small class="muted">Inclusive of all taxes · Free delivery</small>
+
+      <p class="detail-desc" th:text="${product.description}">Description</p>
+
+      <div class="stock-line">
+        <span class="stock ok" th:if="${product.stock > 5}">● In stock</span>
+        <span class="stock low" th:if="${product.stock > 0 and product.stock <= 5}" th:text="|● Only ${product.stock} left|">Low</span>
+        <span class="stock none" th:if="${product.stock <= 0}">● Out of stock</span>
+      </div>
+
+      <th:block th:if="${product.stock > 0}">
+        <form sec:authorize="isAuthenticated()" th:action="@{/cart/add/{id}(id=${product.id})}" method="post">
+          <div class="size-picker" th:if="${!#lists.isEmpty(product.sizeList)}">
+            <h4>Select Size</h4>
+            <div class="size-grid">
+              <label class="size-chip size-chip-lg" th:each="s : ${product.sizeList}">
+                <input type="radio" name="size" th:value="${s}" required>
+                <span th:text="${s}">M</span>
+              </label>
+            </div>
+          </div>
+          <div class="buy-form">
+            <input type="number" name="quantity" value="1" min="1" th:max="${product.stock}">
+            <button class="btn btn-primary btn-lg" type="submit">🛒 Add to Cart</button>
+          </div>
+        </form>
+        <div sec:authorize="isAnonymous()">
+          <a class="btn btn-primary btn-lg" th:href="@{/login}">Sign in to add to cart</a>
+        </div>
+      </th:block>
+
+      <table class="spec-table">
+        <tr th:if="${!#strings.isEmpty(product.brand)}"><th>Brand</th><td th:text="${product.brand}">Brand</td></tr>
+        <tr><th>Category</th><td th:text="${product.category}">Category</td></tr>
+        <tr th:if="${!#strings.isEmpty(product.color)}"><th>Color</th><td th:text="${product.color}">Color</td></tr>
+        <tr th:if="${!#strings.isEmpty(product.fabric)}"><th>Fabric / Material</th><td th:text="${product.fabric}">Fabric</td></tr>
+        <tr th:if="${!#lists.isEmpty(product.sizeList)}"><th>Available sizes</th><td th:text="${product.sizes}">S,M,L</td></tr>
+      </table>
+
+      <ul class="perks">
+        <li>🚚 Free delivery</li>
+        <li>↩️ 7-day easy returns</li>
+        <li>✅ 100% genuine products</li>
+      </ul>
+    </div>
+  </div>
+
+  <section class="section" th:if="${!#lists.isEmpty(related)}">
+    <div class="section-head"><h2>You may also like</h2></div>
+    <div class="grid">
+      <th:block th:each="p : ${related}">
+        <th:block th:replace="~{fragments :: productCard(${p})}"></th:block>
+      </th:block>
+    </div>
+  </section>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

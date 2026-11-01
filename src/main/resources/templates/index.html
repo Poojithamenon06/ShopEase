@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Home')}"></head>
+<body>
+<th:block th:replace="~{fragments :: header}"></th:block>
+
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-text">
+      <span class="eyebrow">New season · Up to 60% off</span>
+      <h1>Everything you love, <span class="grad">all in one place.</span></h1>
+      <p>Fashion, electronics, home essentials, sports and more. Filter by size, color and fabric to find exactly what you need.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-lg" th:href="@{/products}">Shop Now</a>
+        <a class="btn btn-light btn-lg" sec:authorize="isAnonymous()" th:href="@{/register}">Create Account</a>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="art-tile t1">🎧</div>
+      <div class="art-tile t2">👗</div>
+      <div class="art-tile t3">👟</div>
+      <div class="art-tile t4">⌚</div>
+    </div>
+  </div>
+</section>
+
+<section class="container features">
+  <div class="feature"><span>🚚</span><div><strong>Free Shipping</strong><small>On all orders</small></div></div>
+  <div class="feature"><span>🏷️</span><div><strong>Best Prices</strong><small>Great daily deals</small></div></div>
+  <div class="feature"><span>↩️</span><div><strong>Easy Returns</strong><small>7-day policy</small></div></div>
+  <div class="feature"><span>💬</span><div><strong>24/7 Support</strong><small>We're here to help</small></div></div>
+</section>
+
+<section class="container section" th:if="${!#lists.isEmpty(categoryTiles)}">
+  <div class="section-head"><h2>Shop by Category</h2></div>
+  <div class="cat-tiles">
+    <a class="cat-tile" th:each="c : ${categoryTiles}" th:href="@{/products(category=${c.name})}">
+      <span class="cat-emoji" th:text="${c.emoji}">🛍️</span>
+      <span th:text="${c.name}">Category</span>
+    </a>
+  </div>
+</section>
+
+<section class="container section" th:if="${!#lists.isEmpty(trending)}">
+  <div class="section-head">
+    <h2>Top Rated Picks</h2>
+    <a th:href="@{/products(sort='rating')}" class="link-arrow">View all →</a>
+  </div>
+  <div class="grid">
+    <th:block th:each="p : ${trending}">
+      <th:block th:replace="~{fragments :: productCard(${p})}"></th:block>
+    </th:block>
+  </div>
+</section>
+
+<section class="container section">
+  <div class="section-head">
+    <h2>New Arrivals</h2>
+    <a th:href="@{/products}" class="link-arrow">View all →</a>
+  </div>
+  <div class="grid">
+    <th:block th:each="p : ${featured}">
+      <th:block th:replace="~{fragments :: productCard(${p})}"></th:block>
+    </th:block>
+  </div>
+</section>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>
